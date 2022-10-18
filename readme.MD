@@ -170,3 +170,24 @@ To check error equality don’t use ==. Use errors.Is instead (for Go versions >
 To check if the error is of a certain type don’t use type assertion, use errors.As instead (for Go versions >= 1.13).
 
 
+## Logging
+The usage of a logging library is strongly recommended for daemons. Even though there is a log package in the standard library, we generally use Logrus. Its plugin (“hooks”) system makes it a powerful logging library, with the ability to add notifiers and formatters at the logger level directly.
+
+## Structured (JSON) logging
+Every binary ideally must have structured (JSON) logging in place as it helps with searching and filtering the logs. At GitLab we use structured logging in JSON format, as all our infrastructure assumes that. When using Logrus you can turn on structured logging by using the build in JSON formatter. This follows the same logging type we use in our Ruby applications.
+
+## How to use Logrus
+There are a few guidelines one should follow when using the Logrus package:
+
+When printing an error use WithError. For example, logrus.WithError(err).Error("Failed to do something").
+Since we use structured logging we can log fields in the context of that code path, such as the URI of the request using WithField or WithFields. For example, logrus.WithField("file", "/app/go").Info("Opening dir"). If you have to log multiple keys, always use WithFields instead of calling WithField more than once.
+
+## Tracing and Correlation
+LabKit is a place to keep common libraries for Go services. Currently it’s vendored into two projects: Workhorse and Gitaly, and it exports two main (but related) pieces of functionality:
+
+gitlab.com/gitlab-org/labkit/correlation: for propagating and extracting correlation ids between services.
+gitlab.com/gitlab-org/labkit/tracing: for instrumenting Go libraries for distributed tracing.
+This gives us a thin abstraction over underlying implementations that is consistent across Workhorse, Gitaly, and, in future, other Go servers. For example, in the case of gitlab.com/gitlab-org/labkit/tracing we can switch from using Opentracing directly to using Zipkin or Gokit’s own tracing wrapper without changes to the application code, while still keeping the same consistent configuration mechanism (that is, the GITLAB_TRACING environment variable).
+
+
+
