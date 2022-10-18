@@ -3,7 +3,7 @@
 
 ## Table of contents
 - [Introduction](#introduction)
-- [Go Doc Comments] (#go-doc-Comments)
+- [Go Doc Comments](#go-doc-Comments)
 - [Add context to errors](#add-context-to-errors)
 - [Consistent error and log messages](#consistent-error-and-log-messages)
 - [Dependency management](#dependency-management)
