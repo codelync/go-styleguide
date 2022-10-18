@@ -117,6 +117,15 @@ Go GitLab linter plugins are maintained in the gitlab-org/language-tools/go/lint
 ## Dependencies
 Dependencies should be kept to the minimum. The introduction of a new dependency should be argued in the merge request, as per our Approval Guidelines. Both License Scanning and Dependency Scanning should be activated on all projects to ensure new dependencies security status and license compatibility.
 
+
+### Dependency management
+Use modules
+Use modules, since it is the built-in go dependency management tooling and will be widely supported (available with Go 1.11+).
+
+### Use Semantic Versioning
+Tag your packages using Semantic Versioning, check the modules wiki for more information about best practices regarding releases. The git tag for your go package should have the format v<major>.<minor>.<patch>, e.g., v1.0.1.
+
+
 ## Modules
 In Go 1.11 and later, a standard dependency system is available behind the name Go Modules. It provides a way to define and lock dependencies for reproducible builds. It should be used whenever possible.
 
