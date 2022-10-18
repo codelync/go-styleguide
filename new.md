@@ -70,6 +70,6 @@ recommend setting up your editor to:
 - Run `goimports` on save
 - Run `golint` and `go vet` to check for errors
 
-# Go Doc Comments
+## Go Doc Comments
 
 “Doc comments” are comments that appear immediately before top-level package, const, func, type, and var declarations with no intervening newlines. Every exported (capitalized) name should have a doc comment.
