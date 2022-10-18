@@ -89,6 +89,7 @@ We will follow recommendations from
 Automatic linting
 All Go projects should include these GitLab CI/CD jobs:
 
+```
 lint:
   image: registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine
   stage: test
@@ -106,6 +107,7 @@ lint:
       - gl-code-quality-report.json
 
 Including a .golangci.yml in the root directory of the project allows for configuration of golangci-lint. All options for golangci-lint are listed in this example.
+```
 
 Once recursive includes become available, you can share job templates like this analyzer.
 
