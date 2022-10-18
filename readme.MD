@@ -13,7 +13,7 @@ These guidelines have been developed to achieve following outcomes:
 
 ## Golang guidelines
 
-We want to follow recommendations from
+We will follow recommendations from
 [How to Write Go Code](https://golang.org/doc/code.html) and
 [Effective Go]( https://golang.org/doc/effective_go.html). In addition,
 
@@ -36,3 +36,51 @@ We want to follow recommendations from
   factory pattern, for e.g. see
   [this](http://matthewbrown.io/2016/01/23/factory-pattern-in-golang/)
 
+
+## Language agnostic guidelines
+
+* Use a pattern of developing most functionality in small libraries with
+  succinct interfaces (e.g. VFS for filesystem) and executables as a thin layer
+  on top of libraries with command line flags. I/O endpoints can be decided by
+  executables and libraries can work with interfaces - e.g. libraries use
+  [Reader](https://tour.golang.org/methods/21)/Writer interface and executable
+  chooses whether to a file or socket.
+* Use [context](https://blog.golang.org/context) extensively  
+  A context could be started because of an API invocation or timer invocation.
+  Context information should propagate through multiple process or thread
+  boundaries. Log and trace invocations should specify context to use. A
+  detailed description of using context is explained [here](https://gitlab.com/volterra/ves.io/specifications/issues/11).
+  This pattern helps in monitoring response times at different
+  layers and also for faster MTTI/MTTR. Deadlines and Cancellations on context
+  SHOULD be used.
+* Use a worker pool library similar to [this](https://brandur.org/go-worker-pool).
+* Configuration preference for an executable should be following (increasing
+  order of priority):
+  * Code default
+  * Environment variable
+  * Launch flags / command line.
+  * For daemons, runtime configuration through API (which SHALL be persisted).
+    Daemons should also expose via introspect API currently evaluated values
+    for all configuration items.
+* Services SHALL be able to source system configuration from a config
+  interface which could have a database or file-system backing store. This
+  solves chicken/egg problem of bootstrapping.
+* Any security related configuration SHALL NOT have any defaults in code,
+  packaging or deployment scripts - force user to specify it.
+* Register signal for SIGKILL and place graceful termination code
+* Register readiness, liveness, and drain-mode endpoint handlers for service
+  daemons
+* Use application level keepalives on long-lived connections. Connection
+  lifecycle should not have any implied meaning for state change - i.e. audit
+  changes happen only on app-level keepalive loss.
+* All service daemons SHALL expose a REST API and gRPC API. Transport layer
+  (REST/gRPC) should normalize I/O to protobuf messages and invoke business
+  logic in service.
+* All library init/register routine should return a 'handle' so that multiple
+  instances of the library abstraction could be used in same executable. This
+  handle could be allocated in init/register to serve as context inside which
+  library can maintain house-keeping data.
+* All errors (input-errors, handled-server-errors or unhandled-server-errors)
+  returned by a daemon SHALL have both human-readable and machine-parsable
+  details. Errors should have additive contextualized message.  
+  For e.g. as mentioned [here:](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully)
