@@ -84,3 +84,31 @@ We will follow recommendations from
   returned by a daemon SHALL have both human-readable and machine-parsable
   details. Errors should have additive contextualized message.  
   For e.g. as mentioned [here:](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully)
+
+
+Automatic linting
+All Go projects should include these GitLab CI/CD jobs:
+
+lint:
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine
+  stage: test
+  script:
+    # Use default .golangci.yml file from the image if one is not present in the project root.
+    - '[ -e .golangci.yml ] || cp /golangci/.golangci.yml .'
+    # Write the code coverage report to gl-code-quality-report.json
+    # and print linting issues to stdout in the format: path/to/file:line description
+    # remove `--issues-exit-code 0` or set to non-zero to fail the job if linting issues are detected
+    - golangci-lint run --issues-exit-code 0 --out-format code-climate | tee gl-code-quality-report.json | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+    paths:
+      - gl-code-quality-report.json
+
+Including a .golangci.yml in the root directory of the project allows for configuration of golangci-lint. All options for golangci-lint are listed in this example.
+
+Once recursive includes become available, you can share job templates like this analyzer.
+
+Go GitLab linter plugins are maintained in the gitlab-org/language-tools/go/linters namespace.
+
+
