@@ -114,3 +114,59 @@ Once recursive includes become available, you can share job templates like this 
 Go GitLab linter plugins are maintained in the gitlab-org/language-tools/go/linters namespace.
 
 
+## Dependencies
+Dependencies should be kept to the minimum. The introduction of a new dependency should be argued in the merge request, as per our Approval Guidelines. Both License Scanning and Dependency Scanning should be activated on all projects to ensure new dependencies security status and license compatibility.
+
+## Modules
+In Go 1.11 and later, a standard dependency system is available behind the name Go Modules. It provides a way to define and lock dependencies for reproducible builds. It should be used whenever possible.
+
+When Go Modules are in use, there should not be a vendor/ directory. Instead, Go automatically downloads dependencies when they are needed to build the project. This is in line with how dependencies are handled with Bundler in Ruby projects, and makes merge requests easier to review.
+
+In some cases, such as building a Go project for it to act as a dependency of a CI run for another project, removing the vendor/ directory means the code must be downloaded repeatedly, which can lead to intermittent problems due to rate limiting or network failures. In these circumstances, you should cache the downloaded code between.
+
+There was a bug on modules checksums in Go versions earlier than v1.11.4, so make sure to use at least this version to avoid checksum mismatch errors.
+
+
+## Testing
+Testing frameworks
+We should not use any specific library or framework for testing, as the standard library provides already everything to get started. If there is a need for more sophisticated testing tools, the following external dependencies might be worth considering in case we decide to use a specific library or framework:
+
+Testify
+httpexpect
+
+
+### Table-Driven Tests
+Using Table-Driven Tests is generally good practice when you have multiple entries of inputs/outputs for the same function. Below are some guidelines one can follow when writing table-driven test. These guidelines are mostly extracted from Go standard library source code. Keep in mind it’s OK not to follow these guidelines when it makes sense.
+
+
+## Benchmarks
+Programs handling a lot of IO or complex operations should always include benchmarks, to ensure performance consistency over time.
+
+
+## Error handling
+Adding context
+Adding context before you return the error can be helpful, instead of just returning the error. This allows developers to understand what the program was trying to do when it entered the error state making it much easier to debug.
+
+For example:
+
+// Wrap the error
+return nil, fmt.Errorf("get cache %s: %w", f.Name, err)
+
+// Just add context
+return nil, fmt.Errorf("saving cache %s: %v", f.Name, err)
+
+A few things to keep in mind when adding context:
+
+Decide if you want to expose the underlying error to the caller. If so, use %w, if not, you can use %v.
+Don’t use words like failed, error, didn't. As it’s an error, the user already knows that something failed and this might lead to having strings like failed xx failed xx failed xx. Explain what failed instead.
+Error strings should not be capitalized or end with punctuation or a newline. You can use golint to check for this.
+
+### Naming
+When using sentinel errors they should always be named like ErrXxx.
+When creating a new error type they should always be named like XxxError.
+
+### Checking Error types
+To check error equality don’t use ==. Use errors.Is instead (for Go versions >= 1.13).
+To check if the error is of a certain type don’t use type assertion, use errors.As instead (for Go versions >= 1.13).
+
+
