@@ -190,4 +190,25 @@ gitlab.com/gitlab-org/labkit/tracing: for instrumenting Go libraries for distrib
 This gives us a thin abstraction over underlying implementations that is consistent across Workhorse, Gitaly, and, in future, other Go servers. For example, in the case of gitlab.com/gitlab-org/labkit/tracing we can switch from using Opentracing directly to using Zipkin or Gokit’s own tracing wrapper without changes to the application code, while still keeping the same consistent configuration mechanism (that is, the GITLAB_TRACING environment variable).
 
 
+## style guidelines
+The following are some style guidelines that are specific to the Secure Team.
+
+## Code style and format
+
+Use goimports -local gitlab.com/gitlab-org before committing. goimports is a tool that automatically formats Go source code using Gofmt, in addition to formatting import lines, adding missing ones and removing unreferenced ones. By using the -local gitlab.com/gitlab-org option, goimports groups locally referenced packages separately from external ones. See the imports section of the Code Review Comments page on the Go wiki for more details. Most editors/IDEs allow you to run commands before/after saving a file, you can set it up to run goimports -local gitlab.com/gitlab-org so that it’s applied to every file when saving.
+
+## Naming branches
+Only use the characters a-z, 0-9 or - in branch names. This restriction is due to the fact that go get doesn’t work as expected when a branch name contains certain characters, such as a slash /:
+
+$ go get -u gitlab.com/gitlab-org/security-products/analyzers/report/v3@some-user/some-feature
+
+go get: gitlab.com/gitlab-org/security-products/analyzers/report/v3@some-user/some-feature: invalid version: version "some-user/some-feature" invalid: disallowed version string
+
+If a branch name contains a slash, it forces us to refer to the commit SHA instead, which is less flexible. For example:
+
+$ go get -u gitlab.com/gitlab-org/security-products/analyzers/report/v3@5c9a4279fa1263755718cf069d54ba8051287954
+
+go: downloading gitlab.com/gitlab-org/security-products/analyzers/report/v3 v3.15.3-0.20221012172609-5c9a4279fa12
+...
+
 
